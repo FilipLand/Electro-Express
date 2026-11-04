@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>ElectroExpress - Simulador de carrito</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{font-family:Arial, Helvetica, sans-serif;margin:20px;background:#f5f7fb;color:#222}
+  h1{color:#1b3b6f}
+  .container{max-width:1000px;margin:0 auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  label{display:block;margin-bottom:6px;font-weight:600}
+  select,input,textarea{padding:8px;border-radius:6px;border:1px solid #cfd8e3}
+  button{background:#1b6adf;color:#fff;padding:10px 14px;border:none;border-radius:6px;cursor:pointer}
+  button.secondary{background:#777}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+  .cart-empty{color:#777;font-style:italic}
+  .summary{margin-top:12px;padding:10px;background:#f0f6ff;border-radius:6px}
+  .small{font-size:0.9em;color:#555}
+  .input-inline{display:flex;gap:8px;align-items:center}
+  .right{text-align:right}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>ElectroExpress — Simulador de carrito</h1>
+  <p class="small">Selecciona productos ejemplo en los dropdowns y añade artículos al carrito. Cuando pulses <strong>Comprar</strong> se enviará por POST toda la información en el campo oculto <code>productos</code>. El formato por producto es: <code>Tipo:SKU:Nombre:Precio:Cantidad:Extra</code>.</p>
+
+  <form id="formPedido" action="controlador.php" method="post">
+    <div class="row" style="align-items:flex-end">
+      <div style="flex:1;min-width:260px">
+        <label>Productos ejemplo</label>
+        <select id="productoSelect" style="width:100%">
+          <!-- opciones generadas por JS -->
+        </select>
+      </div>
+
+      <div style="width:120px">
+        <label>Cantidad</label>
+        <input type="number" id="cantidadInput" value="1" min="1">
+      </div>
+
+      <div style="width:140px">
+        <label>Extra (peso o licencia)</label>
+        <input type="text" id="extraInput" placeholder="auto" >
+      </div>
+
+      <div>
+        <button type="button" id="addBtn">Añadir a carrito</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <h3>Carrito</h3>
+    <div id="cartArea">
+      <p class="cart-empty">El carrito está vacío.</p>
+    </div>
+
+    <div class="summary" id="summaryArea" style="display:none">
+      <p><strong>Subtotal:</strong> €<span id="subtotal">0.00</span></p>
+      <p class="small">IVA 21% y gastos de envío se calcularán en el servidor.</p>
+    </div>
+
+    <!-- campo oculto que contendrá la lista concatenada -->
+    <input type="hidden" name="productos" id="productosHidden" value="">
+    <input type="hidden" name="cliente" value="Cliente Demo">
+
+    <div style="margin-top:14px">
+      <button type="submit">Comprar</button>
+      <button type="button" class="secondary" id="clearBtn">Limpiar carrito</button>
+    </div>
+  </form>
+</div>
+
+<script>
+/* Datos de ejemplo para ElectroExpress */
+const ejemploProductos = [
+  // Tipo, SKU, Nombre, Precio, Extra(default)
+  {tipo:'F', sku:'SPK1001', nombre:'Altavoz Bluetooth', precio:49.90, extra:'0.8'},
+  {tipo:'D', sku:'SW-AV100', nombre:'Antivirus Pro (licencia)', precio:29.99, extra:'LIC-AV-2025'},
+  {tipo:'F', sku:'CAB200', nombre:'Cable HDMI 2m', precio:9.50, extra:'0.05'},
+  {tipo:'F', sku:'BTN300', nombre:'Batería externa 10000mAh', precio:24.90, extra:'0.3'},
+  {tipo:'D', sku:'EBOOK10', nombre:'Ebook "PHP Avanzado"', precio:14.99, extra:'LIC-EBOOK-001'}
+];
+
+const select = document.getElementById('productoSelect');
+ejemploProductos.forEach((p, idx) => {
+  const opt = document.createElement('option');
+  opt.value = idx;
+  opt.textContent = `${p.sku} — ${p.nombre} — €${p.precio.toFixed(2)} ${p.tipo==='F'?'(Físico)':'(Digital)'}`;
+  select.appendChild(opt);
+});
+
+/* carrito interno */
+let carrito = [];
+
+function renderCart(){
+  const area = document.getElementById('cartArea');
+  area.innerHTML = '';
+  if(carrito.length === 0){
+    area.innerHTML = '<p class="cart-empty">El carrito está vacío.</p>';
+    document.getElementById('summaryArea').style.display = 'none';
+    document.getElementById('productosHidden').value = '';
+    return;
+  }
+  const table = document.createElement('table');
+  table.innerHTML = '<thead><tr><th>Producto</th><th>Cantidad</th><th>Precio unit.</th><th>Extra</th><th class="right">Total</th><th></th></tr></thead>';
+  const tbody = document.createElement('tbody');
+  let subtotal = 0;
+  carrito.forEach((item, i) => {
+    const tr = document.createElement('tr');
+    const totalLine = item.precio * item.cantidad;
+    subtotal += totalLine;
+    tr.innerHTML = `<td>${item.sku} — ${escapeHTML(item.nombre)}</td>
+      <td>${item.cantidad}</td>
+      <td>€${item.precio.toFixed(2)}</td>
+      <td>${escapeHTML(item.extra)}</td>
+      <td class="right">€${totalLine.toFixed(2)}</td>
+      <td><button data-i="${i}" class="removeBtn">Quitar</button></td>`;
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  area.appendChild(table);
+  document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+  document.getElementById('summaryArea').style.display = 'block';
+
+  // preparar el campo oculto con formato pedido por el alumno (Tipo:SKU:Nombre:Precio:Cantidad:Extra|...)
+  const parts = carrito.map(it => `${it.tipo}:${it.sku}:${it.nombre}:${it.precio}:${it.cantidad}:${it.extra}`);
+  document.getElementById('productosHidden').value = parts.join('|');
+
+  // attach remove handlers
+  Array.from(document.getElementsByClassName('removeBtn')).forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.i, 10);
+      carrito.splice(idx,1);
+      renderCart();
+    });
+  });
+}
+
+function escapeHTML(s){ return String(s).replace(/[&<>"']/g, (m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  const idx = parseInt(select.value,10);
+  const producto = ejemploProductos[idx];
+  const cantidad = Math.max(1, parseInt(document.getElementById('cantidadInput').value,10) || 1);
+  let extra = document.getElementById('extraInput').value.trim();
+  if(!extra){
+    extra = producto.extra; // valor por defecto
+  }
+  carrito.push({
+    tipo: producto.tipo,
+    sku: producto.sku,
+    nombre: producto.nombre,
+    precio: producto.precio,
+    cantidad: cantidad,
+    extra: extra
+  });
+  renderCart();
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  carrito = [];
+  renderCart();
+});
+
+/* Si el usuario pulsa enviar sin JS el textarea no existe; pero con JS ya se prepara productosHidden.
+   El alumno deberá implementar en servidor el parseo del campo 'productos' y la lógica. */
+</script>
+</body>
+</html>
