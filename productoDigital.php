@@ -14,4 +14,16 @@
     {
         return parent::__toString() . "// Tipo  : $this->tipo // Licencia : $this->licencia )";
     }
+    public function getTipo(): string{
+        return $this->tipo;
+    }
+    public function getLicencia(): string{
+        return $this->licencia;
+    }
+    public function setLicencia(string $licencia): void{
+        $this->licencia = trim($licencia);
+    }
+    public function setTipo(string $tipo): void{
+        $this->tipo = trim($tipo);
+    }
 }

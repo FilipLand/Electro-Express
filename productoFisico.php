@@ -4,6 +4,9 @@ require_once 'producto.php';
 {
         public function __construct(string $SKU, string $nombre,float $precio, protected string $tipo, protected float $peso )
         {
+            if ($precio < 0) {
+                throw new InvalidArgumentException('Precio unitario inválido');
+            }
             parent::__construct($SKU, $nombre, $precio);
         }
         #[Override]
