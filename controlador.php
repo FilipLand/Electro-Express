@@ -73,11 +73,13 @@ require_once __DIR__ .'/productoDigital.php';
                     //crea un objeto segun el tipo segun F y D 
                 if  ($tipo === 'F')
                 {
-                    if ( !is_numeric($extra) || !is_finite((float) $extra) || (float) $extra < 0 ) 
+                    $pesoTexto = preg_replace('/\s*kg\s*$/i', '', $extra);
+                    $pesoTexto = str_replace(',', '.', $pesoTexto);
+                    if ( !is_numeric($pesoTexto) || !is_finite((float) $pesoTexto) || (float) $pesoTexto < 0 )
                     {
-                      throw new InvalidArgumentException('El peso no debe ser un numero negativo.');
+                      throw new InvalidArgumentException('El peso debe ser un numero no negativo y puede incluir la unidad kg.');
                     }
-                    $peso = (float) $extra;
+                    $peso = (float) $pesoTexto;
                     $producto = new ProductoFisico($sku, $nombre, $precio, 'F', $peso);
                     $pesoTotal += $peso * $cantidad;
                     $hayProductosFisicos = true;
