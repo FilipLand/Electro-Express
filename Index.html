@@ -35,7 +35,6 @@
           <!-- opciones generadas por JS -->
         </select>
       </div>
-
       <div style="width:120px">
         <label>Cantidad</label>
         <input type="number" id="cantidadInput" value="1" min="1">
@@ -59,7 +58,7 @@
     </div>
 
     <div class="summary" id="summaryArea" style="display:none">
-      <p><strong>Subtotal:</strong> €<span id="subtotal">0.00</span></p>
+      <p><strong>Subtotal:</strong> € <span id="subtotal">0.00</span></p>
       <p class="small">IVA 21% y gastos de envío se calcularán en el servidor.</p>
     </div>
 
@@ -89,7 +88,7 @@ const select = document.getElementById('productoSelect');
 ejemploProductos.forEach((p, idx) => {
   const opt = document.createElement('option');
   opt.value = idx;
-  opt.textContent = `${p.sku} — ${p.nombre} — €${p.precio.toFixed(2)} ${p.tipo==='F'?'(Físico)':'(Digital)'}`;
+  opt.textContent = `${p.sku} — ${p.nombre} — € ${p.precio.toFixed(2)} ${p.tipo==='F'?'(Físico)':'(Digital)'}`;
   select.appendChild(opt);
 });
 
