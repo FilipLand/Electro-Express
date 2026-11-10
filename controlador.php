@@ -27,7 +27,7 @@ require_once __DIR__ .'/productoDigital.php';
     $pesoTotal = 0.0;
     $hayProductosFisicos = false;
 
-//El comprobar errores los errores
+//El comprobador de los errores
     try {
         //Separo por "|" y por ":"
         $productos = explode('|', $datosProductos);
@@ -67,18 +67,21 @@ require_once __DIR__ .'/productoDigital.php';
                     $precio = (float) $precioTexto;
                 //Validar que es positivo la cantidad
                 $cantidad = filter_var($cantidadTexto , FILTER_VALIDATE_INT);
-                    if ($cantidad === false || $cantidad <= 0 ){
+                    if ($cantidad === false || $cantidad <= 0 )
+                    {
                         throw new InvalidArgumentException('El valor no puede ser negativo');
                     }
                     //crea un objeto segun el tipo segun F y D 
                 if  ($tipo === 'F')
                 {
+                    //configurar peso
                     $pesoTexto = preg_replace('/\s*kg\s*$/i', '', $extra);
                     $pesoTexto = str_replace(',', '.', $pesoTexto);
                     if ( !is_numeric($pesoTexto) || !is_finite((float) $pesoTexto) || (float) $pesoTexto < 0 )
                     {
                       throw new InvalidArgumentException('El peso debe ser un numero no negativo y puede incluir la unidad kg.');
                     }
+                    //datos
                     $peso = (float) $pesoTexto;
                     $producto = new ProductoFisico($sku, $nombre, $precio, 'F', $peso);
                     $pesoTotal += $peso * $cantidad;
@@ -115,7 +118,7 @@ require_once __DIR__ .'/productoDigital.php';
         $total = $subtotal + $iva + $envio;
 
     } catch (InvalidArgumentException $e) {
-
+        //mensaje de error
         http_response_code(400);
         echo '<h1>No se pudo procesar el pedido</h1>';
         echo '<p>' . htmlspecialchars(
