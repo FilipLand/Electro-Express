@@ -1,5 +1,5 @@
 <?php 
-    class Producto
+    abstract class Producto
     {
         public function __construct(protected string $SKU, protected string $nombre , protected float $precio)
         {

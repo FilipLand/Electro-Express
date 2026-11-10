@@ -4,20 +4,23 @@ require_once __DIR__ . '/productoFisico.php';
 require_once __DIR__ .'/productoDigital.php';
 
 //comprobar si alguien entra directamente a comprobar
-   if ($_SERVER['REQUEST_METHOD'] !== 'POST'){
+   if ($_SERVER['REQUEST_METHOD'] !== 'POST')
+    {
         http_response_code(405);
-        exit('Abre el indice y pulsa a comprar');
-   }
+        exit('Abre el indice y pulsa a comprar. </br> <a href="Index.html">Volver al indice</a>');
+    }
 
    $datosProductos = $_POST['productos'] ?? null;
-   if (!is_string($datosProductos) || trim($datosProductos) === '') {
+   if (!is_string($datosProductos) || trim($datosProductos) === '') 
+    {
         http_response_code(400);
-        exit('El carrito esta vacio. <a href="Index.html">Volver al carrito</a>');
-   }
+        exit('El carrito esta vacio. </br> <a href="Index.html">Volver al indice</a>');
+    }
 
 //mirar por si acaso cliente
     $cliente = $_POST['cliente'] ?? 'Cliente Demo';
-    if (!is_string($cliente)){
+    if (!is_string($cliente))
+    {
         $cliente = 'Cliente Demo';
     }
 
@@ -27,11 +30,10 @@ require_once __DIR__ .'/productoDigital.php';
     $pesoTotal = 0.0;
     $hayProductosFisicos = false;
 
-//El comprobar errores los errores
+//El comprobador de los errores
     try {
         //Separo por "|" y por ":"
         $productos = explode('|', $datosProductos);
-
         foreach ($productos as $textoProducto) {
             $campos = explode(':', $textoProducto);
             if (count($campos) !== 6) {
@@ -67,34 +69,39 @@ require_once __DIR__ .'/productoDigital.php';
                     $precio = (float) $precioTexto;
                 //Validar que es positivo la cantidad
                 $cantidad = filter_var($cantidadTexto , FILTER_VALIDATE_INT);
-                    if ($cantidad === false || $cantidad <= 0 ){
+                    if ($cantidad === false || $cantidad <= 0 )
+                    {
                         throw new InvalidArgumentException('El valor no puede ser negativo');
                     }
                     //crea un objeto segun el tipo segun F y D 
                 if  ($tipo === 'F')
                 {
+                    //configurar peso
                     $pesoTexto = preg_replace('/\s*kg\s*$/i', '', $extra);
                     $pesoTexto = str_replace(',', '.', $pesoTexto);
                     if ( !is_numeric($pesoTexto) || !is_finite((float) $pesoTexto) || (float) $pesoTexto < 0 )
                     {
                       throw new InvalidArgumentException('El peso debe ser un numero no negativo y puede incluir la unidad kg.');
                     }
+                    //datos
                     $peso = (float) $pesoTexto;
                     $producto = new ProductoFisico($sku, $nombre, $precio, 'F', $peso);
                     $pesoTotal += $peso * $cantidad;
                     $hayProductosFisicos = true;
                     $detalleExtra = 'Fisico - peso: ' . $peso . ' kg';
                 }   else {
-                    if ($extra === '') {
+                    if ($extra === '') 
+                        {
                         throw new InvalidArgumentException('La licencia no puede estar vacia.');
-                    }
+                        }
                     $producto = new productoDigital($sku, $nombre, $precio, 'D', $extra);
                     $detalleExtra = 'Digital - licencia: ' . $extra;
                 }
                 //guardar el importe y guardar los datos para dibujarlo para después
                 $importe = $precio * $cantidad;
                 $subtotal += $importe;
-                $lineasFactura[] = [
+                $lineasFactura[] = 
+                [
                     'producto' => $producto,
                     'cantidad' => $cantidad,
                     'extra' => $detalleExtra,
@@ -102,7 +109,8 @@ require_once __DIR__ .'/productoDigital.php';
                 ];
         }
         // Comprobar si se ha añadido alguna linea.
-        if (count($lineasFactura) === 0) {
+        if (count($lineasFactura) === 0) 
+        {
             throw new InvalidArgumentException('El carrito no tiene productos.');
         }
         // Formulas del ejercicio.
@@ -115,7 +123,7 @@ require_once __DIR__ .'/productoDigital.php';
         $total = $subtotal + $iva + $envio;
 
     } catch (InvalidArgumentException $e) {
-
+        //mensaje de error
         http_response_code(400);
         echo '<h1>No se pudo procesar el pedido</h1>';
         echo '<p>' . htmlspecialchars(
@@ -123,7 +131,10 @@ require_once __DIR__ .'/productoDigital.php';
             ENT_QUOTES,
             'UTF-8'
         ) . '</p>';
-        echo '<p><a href="Index.html">Volver al inicio</a></p>';
+        echo '<p>
+                </br>
+                <a href="Index.html">Volver al inicio</a>
+            </p>';
         exit;
     }
     
@@ -139,6 +150,23 @@ require_once __DIR__ .'/productoDigital.php';
     <head>
         <meta charset="utf-8">
         <title>Factura ElectroExpress</title>
+        <style>
+            body{font-family:Arial, Helvetica, sans-serif;margin:20px;background:#e4edff;color:#222}
+            h1{color:#1b3b6f}
+            .container{max-width:1000px;margin:0 auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+            .row{display:flex;gap:12px;flex-wrap:wrap}
+            label{display:block;margin-bottom:6px;font-weight:600}
+            select,input,textarea{padding:8px;border-radius:6px;border:1px solid #cfd8e3}
+            button{background:#1b6adf;color:#fff;padding:10px 14px;border:none;border-radius:6px;cursor:pointer}
+            button.secondary{background:#777}
+            table{width:100%;border-collapse:collapse;margin-top:12px}
+            th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+            .cart-empty{color:#777;font-style:italic}
+            .summary{margin-top:12px;padding:10px;background:#f0f6ff;border-radius:6px}
+            .small{font-size:0.9em;color:#555}
+            .input-inline{display:flex;gap:8px;align-items:center}
+            .right{text-align:right}
+        </style>
     </head>
     <body>
         <h1>Factura ElectroExpress</h1>
@@ -175,6 +203,7 @@ require_once __DIR__ .'/productoDigital.php';
             <p>IVA (21 %): <?= number_format($iva, 2, ',', '.') ?> EUR</p>
             <h2>Total: <?= number_format($total, 2, ',', '.') ?> EUR</h2>
         </section>
+        </br>
         <button type="button" onclick="window.print()">Imprimir factura</button>
         <a href="Index.html">Volver</a>
     </body>
