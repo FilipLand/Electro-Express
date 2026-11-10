@@ -12,7 +12,7 @@ require_once __DIR__ .'/productoDigital.php';
    $datosProductos = $_POST['productos'] ?? null;
    if (!is_string($datosProductos) || trim($datosProductos) === '') {
         http_response_code(400);
-        exit('El carrito esta vacio. <a href="Index.html">Volver al carrito</a>');
+        exit('El carrito esta vacio. </br> <a href="Index.html">Volver al carrito</a>');
    }
 
 //mirar por si acaso cliente
@@ -126,7 +126,10 @@ require_once __DIR__ .'/productoDigital.php';
             ENT_QUOTES,
             'UTF-8'
         ) . '</p>';
-        echo '<p><a href="Index.html">Volver al inicio</a></p>';
+        echo '<p>
+                </br>
+                <a href="Index.html">Volver al inicio</a>
+            </p>';
         exit;
     }
 
