@@ -4,20 +4,23 @@ require_once __DIR__ . '/productoFisico.php';
 require_once __DIR__ .'/productoDigital.php';
 
 //comprobar si alguien entra directamente a comprobar
-   if ($_SERVER['REQUEST_METHOD'] !== 'POST'){
+   if ($_SERVER['REQUEST_METHOD'] !== 'POST')
+    {
         http_response_code(405);
         exit('Abre el indice y pulsa a comprar');
-   }
+    }
 
    $datosProductos = $_POST['productos'] ?? null;
-   if (!is_string($datosProductos) || trim($datosProductos) === '') {
+   if (!is_string($datosProductos) || trim($datosProductos) === '') 
+    {
         http_response_code(400);
         exit('El carrito esta vacio. </br> <a href="Index.html">Volver al carrito</a>');
-   }
+    }
 
 //mirar por si acaso cliente
     $cliente = $_POST['cliente'] ?? 'Cliente Demo';
-    if (!is_string($cliente)){
+    if (!is_string($cliente))
+    {
         $cliente = 'Cliente Demo';
     }
 
@@ -31,7 +34,6 @@ require_once __DIR__ .'/productoDigital.php';
     try {
         //Separo por "|" y por ":"
         $productos = explode('|', $datosProductos);
-
         foreach ($productos as $textoProducto) {
             $campos = explode(':', $textoProducto);
             if (count($campos) !== 6) {
@@ -88,16 +90,18 @@ require_once __DIR__ .'/productoDigital.php';
                     $hayProductosFisicos = true;
                     $detalleExtra = 'Fisico - peso: ' . $peso . ' kg';
                 }   else {
-                    if ($extra === '') {
+                    if ($extra === '') 
+                        {
                         throw new InvalidArgumentException('La licencia no puede estar vacia.');
-                    }
+                        }
                     $producto = new productoDigital($sku, $nombre, $precio, 'D', $extra);
                     $detalleExtra = 'Digital - licencia: ' . $extra;
                 }
                 //guardar el importe y guardar los datos para dibujarlo para después
                 $importe = $precio * $cantidad;
                 $subtotal += $importe;
-                $lineasFactura[] = [
+                $lineasFactura[] = 
+                [
                     'producto' => $producto,
                     'cantidad' => $cantidad,
                     'extra' => $detalleExtra,
@@ -105,7 +109,8 @@ require_once __DIR__ .'/productoDigital.php';
                 ];
         }
         // Comprobar si se ha añadido alguna linea.
-        if (count($lineasFactura) === 0) {
+        if (count($lineasFactura) === 0) 
+        {
             throw new InvalidArgumentException('El carrito no tiene productos.');
         }
         // Formulas del ejercicio.
@@ -132,7 +137,6 @@ require_once __DIR__ .'/productoDigital.php';
             </p>';
         exit;
     }
-
     //Mostrar texto sin interpretar como html 
     function escapar(string $texto): string
         {
@@ -160,7 +164,7 @@ require_once __DIR__ .'/productoDigital.php';
             .small{font-size:0.9em;color:#555}
             .input-inline{display:flex;gap:8px;align-items:center}
             .right{text-align:right}
-    </style>
+        </style>
     </head>
     <body>
         <h1>Factura ElectroExpress</h1>
@@ -197,6 +201,7 @@ require_once __DIR__ .'/productoDigital.php';
             <p>IVA (21 %): <?= number_format($iva, 2, ',', '.') ?> EUR</p>
             <h2>Total: <?= number_format($total, 2, ',', '.') ?> EUR</h2>
         </section>
+        </br>
         <button type="button" onclick="window.print()">Imprimir factura</button>
         <a href="Index.html">Volver</a>
     </body>
