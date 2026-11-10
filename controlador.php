@@ -141,6 +141,23 @@ require_once __DIR__ .'/productoDigital.php';
     <head>
         <meta charset="utf-8">
         <title>Factura ElectroExpress</title>
+        <style>
+            body{font-family:Arial, Helvetica, sans-serif;margin:20px;background:#e4edff;color:#222}
+            h1{color:#1b3b6f}
+            .container{max-width:1000px;margin:0 auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+            .row{display:flex;gap:12px;flex-wrap:wrap}
+            label{display:block;margin-bottom:6px;font-weight:600}
+            select,input,textarea{padding:8px;border-radius:6px;border:1px solid #cfd8e3}
+            button{background:#1b6adf;color:#fff;padding:10px 14px;border:none;border-radius:6px;cursor:pointer}
+            button.secondary{background:#777}
+            table{width:100%;border-collapse:collapse;margin-top:12px}
+            th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+            .cart-empty{color:#777;font-style:italic}
+            .summary{margin-top:12px;padding:10px;background:#f0f6ff;border-radius:6px}
+            .small{font-size:0.9em;color:#555}
+            .input-inline{display:flex;gap:8px;align-items:center}
+            .right{text-align:right}
+    </style>
     </head>
     <body>
         <h1>Factura ElectroExpress</h1>
