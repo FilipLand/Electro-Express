@@ -126,6 +126,7 @@ require_once __DIR__ .'/productoDigital.php';
         echo '<p><a href="Index.html">Volver al inicio</a></p>';
         exit;
     }
+    
 
     //Mostrar texto sin interpretar como html 
     function escapar(string $texto): string
