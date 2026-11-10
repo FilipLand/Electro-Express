@@ -7,14 +7,14 @@ require_once __DIR__ .'/productoDigital.php';
    if ($_SERVER['REQUEST_METHOD'] !== 'POST')
     {
         http_response_code(405);
-        exit('Abre el indice y pulsa a comprar');
+        exit('Abre el indice y pulsa a comprar. </br> <a href="Index.html">Volver al indice</a>');
     }
 
    $datosProductos = $_POST['productos'] ?? null;
    if (!is_string($datosProductos) || trim($datosProductos) === '') 
     {
         http_response_code(400);
-        exit('El carrito esta vacio. </br> <a href="Index.html">Volver al carrito</a>');
+        exit('El carrito esta vacio. </br> <a href="Index.html">Volver al indice</a>');
     }
 
 //mirar por si acaso cliente
